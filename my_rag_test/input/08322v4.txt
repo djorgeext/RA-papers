@@ -1,0 +1,751 @@
+1
+Phonocardiographic Sensing using Deep Learning
+for Abnormal Heartbeat Detection
+Siddique Latif1, Muhammad Usman2, Rajib Rana3, and Junaid Qadir1
+1Information Technology University (ITU)-Punjab, Pakistan
+2COMSATS Institute of Information Technology, Islamabad
+3University of Southern Queensland, Australia
+Abstract—Cardiac auscultation involves expert interpretation
+of abnormalities in heart sounds using stethoscope. Deep learn-
+ing based cardiac auscultation is of signiﬁcant interest to the
+healthcare community as it can help reducing the burden of
+manual auscultation with automated detection of abnormal heart-
+beats. However, the problem of automatic cardiac auscultation
+is complicated due to the requirement of reliability and high
+accuracy, and due to the presence of background noise in the
+heartbeat sound. In this work, we propose a Recurrent Neural
+Networks (RNNs) based automated cardiac auscultation solution.
+Our choice of RNNs is motivated by the great success of deep
+learning in medical applications and by the observation that
+RNNs represent the deep learning conﬁguration most suitable for
+dealing with sequential or temporal data even in the presence
+of noise. We explore the use of various RNN models, and
+demonstrate that these models deliver the abnormal heartbeat
+classiﬁcation score with signiﬁcant improvement. Our proposed
+approach using RNNs can be potentially be used for real-time
+abnormal heartbeat detection in the Internet of Medical Things
+for remote monitoring applications.
+I. INTRODUCTION
+Cardiovascular diseases (CVDs) are the major health prob-
+lem and have been the leading cause of death globally.
+They are causing nearly 48% deaths in Europe [1], 34.3%
+in America [2], and more than 75% in developing countries
+[3]. Earlier diagnosis of CVDs is crucial as it can drastically
+decrease the potential risk factors of these deaths [4].
+Auscultation is an widely used method for CVD diagnosis,
+which uses stethoscope to ﬁnd out clues of different cardiac
+abnormalities. However, it requires extensive training and ex-
+perience for proper auscultating [5]. Only 20 to 40% accuracy
+can be achieved when performed by medical students and
+primary care physicians [6], [7], and roughly 80% can be
+achieved when conducted by expert cardiologists [8], [9].
+Another effective solution is echocardiograms that visualize
+the heart beating and blood pumping. However, this procedure
+is expensive with an average cost of $1500 as per current cost
+[10]. Overall, there is a distinctive lack of a reliable yet cost-
+effective tool for earlier diagnosis of CVD.
+A potential solution to the above-mentioned problems is
+a sensor-enabled automated diagnosis in real-time using mo-
+bile devices and cloud computing [11], [12]. In fact, this
+has inspired the development of phonocardiography (PCG),
+which is now an effective and non-invasive method for earlier
+detection of cardiac abnormality [13]. In PCG, heart sound
+is recorded from the chest wall using a digital stethoscope
+and this sound is analyzed to detect whether the heart is
+functioning normally or the patient should be referred to
+an expert for further diagnosis. Due to its high potential,
+automatic detection of cardiac abnormalities through PCG
+signal is a rapidly growing ﬁeld of research [14]. Most of
+these automated cardiac auscultation attempts, however, have
+utilized either classical machine learning models (e.g., [15]–
+[18]) or feed-forward neural networks [19], [20] rather than
+Recurrent Neural Networks (RNNs)—which are intrinsically
+better suited for this task.
+Heart sound is a physiologic time series and it possesses
+temporal dynamics that change based on the different heart
+symptoms. Due to their well-known capabilities for modeling
+and analyzing sequential data even in the presence of noise
+[21], in this paper we explore various RNNs for automated
+cardiac auscultation. We use 2016 PhysioNet Computing in
+Cardiology Challenge dataset [22] that contains phonocardio-
+grams recorded using sensors placed at the four common
+locations of human body: pulmonic area, aortic area, mitral
+area, and tricuspid area. The work presented in this study is
+the ﬁrst attempt that investigates the performance of various
+state-of-the-art RNNs for heartbeat classiﬁcation using PCG
+signals.
+II. RELATED WORK
+In the past few years, automatic analysis of phonocardio-
+gram (PCG), which refers to the high-ﬁdelity sound recording
+of murmurs made by the heart, has been widely studied
+especially for automated heartbeat segmentation and classi-
+ﬁcation. According to Liu et al. [22] there was no existing
+study that applied deep learning for automatic analysis on
+heartbeat before the 2016 PhysioNet Computing in Cardiology
+Challenge. Now there are few attempts using deep learning
+models for classifying normal and abnormal heart sounds,
+which we describe next.
+A deep learning based approach was used in [23] for
+automatic recognition of abnormal heartbeat using a deep
+Convolutional Neural Network (CNN). The authors computed
+a two-dimensional heat map from one-dimensional time se-
+ries of PCG signal with the overlapping segment length of
+T = 3 seconds and used for training and validation of the
+model. They achieved the highest speciﬁcity score 0.9521
+****This work has been submitted to the IEEE Sensors J. for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible.****
+arXiv:1801.08322v4  [cs.CV]  28 Jul 2020
+
+
+2
+as compared to all entries made in PhysioNet Computing in
+Cardiology challenge but their sensitivity and accuracy scores
+were low: 0.7278 and 0.8399, respectively.
+A fully connected neural network (NN) consisting of 15
+hidden layers was used in [20] for the classiﬁcation of PCG
+signals. The authors achieved the recognition rate of 80% with
+the speciﬁcity of 82 and poor sensitivity of 63. Potes et al. [24]
+used an ensemble of AdaBoost and the CNN classiﬁers to
+classify normal/abnormal heartbeats. This ensemble approach
+achieved the highest score in the among others and achieved
+rank one in the competition with the speciﬁcity, sensitivity,
+and overall score of 0.7781, 0.9424, and 0.8602, respectively.
+Other approaches in this challenge were based on the classical
+machine learning based classiﬁers. Interestingly, none of the
+above studies have attempted RNN, which is, however, the
+most powerful model for time series data.
+RNN architectures such as Long Short-term Memory
+(LSTM) and Gated Recurrent Units (GRU) have not been
+used for PCG analysis but they have achieved state-of-the-art
+performances in various other applications with sequential data
+including speech recognition [25], [26], machine translation
+[27], [28], and emotion detection [29]. Bidirectional Long
+Short-Term Memory (BLSTM) [30], which processes the
+information in both directions with two different LSTM layers
+show even better performance than LSTM and other conven-
+tional RNNs in phoneme classiﬁcation and recognition [31].
+Moreover, Deep BLSTMs with the objective function of Con-
+nectionist Temporal Classiﬁcation (CTC) are very effective in
+optimizing word error rate in speech recognition system with
+no prior linguistic or lexicon information [32]. Bidirectional
+Gated Recurrent Units (BiGRUs) have also been used for
+audio processing. They achieved a signiﬁcant improvement in
+the performance of sound events detection from the recording
+of real-life, by capturing their temporal boundaries [33].
+III. PROPOSED APPROACH AND RNN MODELS
+Our proposed approach for heart sound classiﬁcation using
+RNNs is depicted in Figure 1. The heart sound is ﬁrst
+prepossessed for ﬁrst and second heart sounds (S1 and S2,
+respectively) detection and segmented into smaller chunks.
+Features extracted from these segments are given to the
+RNNs for classiﬁcation, which classiﬁes these into normal or
+abnormal.
+Figure 1: Block diagram of proposed approach
+A. Recurrent Neural Networks (RNNs)
+Recurrent neural networks (RNNs) are specialized to pro-
+cess sequences, unlike the CNNs, which are specialized for
+grid-like structures, such as, images. It takes an input sequence
+x(t) = (x1, ....., xT ) and at the current time step t calculates
+the hidden state or memory of the network ht using previous
+hidden state ht−1 and the input xt. The outputs from RNN
+are projected to the number of classes. A softmax function is
+used to project the output vector into the probability vector
+having values in [0,1]. When RNNs are used for abnormal
+heartbeat detection, its end layer is projected to the number
+of classes (normal and abnormal). Given a series of heart
+signal x(t) = (x1, ....., xT ), an RNN classiﬁer learn to predict
+hypotheses ˆy of true label y. The standard equations for RNN
+is given below:
+ht = H(Wxhxt + Whhht−1 + bh)
+(1)
+yt = (Wxhxt + by)
+(2)
+where W terms are the weight matrices (i.e., Wxh is weight
+matrix of an input-hidden layer), b is the bias vector and H
+denotes the hidden layer function.
+1) Long Short-Term Memory (LSTM) Units: The LSTM
+[21] network is a special type of RNN that consists of a
+recurrent memory block to store representations for extended
+time intervals. A memory block consists of three gates: input,
+output and forget gate. These multiplicative gates learn to
+control the constant error ﬂow within each memory cell. The
+memory cell decides what to store, and when to enable reads,
+writes and erasures of information. Graphical representation
+of LSTM memory cell is shown in Figure 2a.
+When features from a sequence of heart signal are given to
+the network, each LSTM unit holds a memory ct at a speciﬁc
+time t. The activation function is given by:
+ht = ot tanh(ct)
+(3)
+The output gate ot modulates the memory content and calcu-
+lated by:
+ot = σ
+ Wxoxt + Whoht−1 + Wcoct + bo
+
+(4)
+The forget gate ft control the memory in the network and
+update it by forgetting the existing memory ct with the
+incoming information.
+ft = σ
+ Wxfxt + Whfht−1 + Wcfct + bf
+
+(5)
+The extent of incoming information is controlled by the input
+gate it
+it = σ
+ Wifxt + Whiht−1 + Wcict + bi
+
+(6)
+The existing memory in the network is ﬁnally updated by the
+following equation under the control of these three gates.
+ct = ftct−1 + it tanh
+ Wxcxt + Whcht−1 + bc
+
+(7)
+2) Gated Recurrent Units (GRUs): The Gated Recurrent
+Unit (GRU) [27] is a slightly simpliﬁed version of LSTM
+that combines the input and forget gates into a single gate
+known as update gate. GRU architecture has an additional reset
+gate as compared to LSTM (see Figure 2b). GRUs control the
+information ﬂow from the previous activation while computing
+candidate activation but unlike LSTM do not control the
+amount of incoming memory using the forget gate.
+
+
+3
+(a)
+(b)
+(c)
+Figure 2: Graphical representation of (2a) LSTM memory cell; (2b) Gated Recurrent Unit (GRU); (2c) bidirectional LSTM.
+B. Bidirectional Recurrent Neural Networks
+One shortcoming of standard RNNs is that they can only
+use previous information for making decisions. Bidirectional
+RNNs [30] using LSTM units or GRUs can process the
+information both in the forward and backward direction which
+enable them to exploit future context. This is achieved by com-
+puting the hidden sequence both in forward −→h and backward
+direction ←−h , and updating the output layer using backward
+layer from time step t = T to 1 and forward layer from t = 1
+to T (see Figure 2c).
+Similarly, a bidirectional GRU (BiGRU) exploits the full
+use of contextual information and produces two sequences
+[hf
+1, hf
+2, ....., hf
+T ] and [hb
+1, hb
+2, ....., hb
+T ] by processing the infor-
+mation both in forward and backward directions, respectively.
+These two sequences are concatenated at the output by the
+following equation:
+←−−→
+GRU(X) = |hf
+1||hb
+T , ..., hf
+T ||hb
+1|.
+(8)
+Here, the ←−−→
+GRU(X) term represents the full output of BiGRU
+produced by concatenating each state in forward direction hf
+i
+and backward direction hb
+(T −i+1) at step i given the input X.
+In this paper, we use both RNNs and bidirectional RNNs and
+compare their performances on abnormal heartbeat detection.
+IV. EXPERIMENTAL PROCEDURE
+The performance of different RNN models is evaluated on
+the publicly available datasets. The details of the datasets and
+experimental procedure are presented in this section.
+A. Database Description
+To evaluate the proposed methodology, the largest dataset
+provided at the “Physionet Challenge 2016” [22] has been
+used. The Physionet dataset consists of six databases (A
+through F) containing a total of 3240 raw heart sound record-
+ings. These recordings were independently collected by dif-
+ferent research teams using heterogeneous sensing equipment
+from different countries both in clinical and nonclinical (i.e.,
+home visits) settings. The dataset contains both clean and
+noisy heart sound recordings. The recordings were collected
+both from healthy subjects and patients with a variety of heart
+conditions, especially coronary artery disease and heart valve
+disease. The subjects were from different age groups including
+children, adults and elderly. The length of heart sound record-
+ings varied from 5 seconds to just over 120 seconds. For our
+experiments, we use all six databases containing normal and
+abnormal heart sound recordings.
+B. Preprocessing of Heart Sound
+The heart sound recorded by electronic stethoscope often
+has background noise. The preprocessing of heart sound is an
+essential and crucial step for automatic analysis of heartbeat
+recordings. It reveals the inherent physiological structure of the
+heart signal by detecting the abnormalities in the meaningful
+regions of PCG signal and allows for the automatic recognition
+of pathological events. The detection of the exact locations
+of the ﬁrst and second heart sounds (i.e., S1 and S2) within
+PCG is known as the segmentation process. The main goal of
+this process is to ensure that incoming heartbeats are properly
+aligned before their classiﬁcation as it signiﬁcantly improves
+the recognition scores [34].
+In this paper, we used state-of-the-art method Logistic
+Regression-Hidden Semi-Markov Models (HSMM) for iden-
+tiﬁcation of heart states proposed by Springer et al. [35]. This
+method uses LR-derived emission or observation probability
+estimates and provides signiﬁcantly improved results as com-
+pared to the previous approaches based on the Gaussian or
+Gamma distributions [36], [37].
+The working of Logistic Regression-HSMM is similar to
+SVM based emission probabilities [38] and it allows for
+greater discrimination between different states. Logistic re-
+gression is a binary classiﬁer that maps the feature space or
+predictor variables to the binary response variables by using
+a logistic function. The logistic function σ(a) is deﬁned as:
+σ(a) =
+1
+1 + exp (−a)
+(9)
+The probability of a state or class given the input observations
+Ot can be deﬁned using the logistic function:
+P
+
+qt = ξ|Ot
+
+= σ(w
+′Ot).
+(10)
+The term w represents the weights of the model that are
+applied to each observation or input features. The model
+is trained iteratively and re-weighted least squares on the
+
+
+4
+training data. For one-vs-all logistic regression, the probability
+of each observation given the state bj(Ot|ξj) is found by using
+Bayes’rule:
+bj(Ot) = P
+
+Ot|qt = ξ
+
+= P
+
+qt = ξ|Ot
+
+× P
+ Ot
+
+P
+ ξj
+
+.
+(11)
+The P(Ot) is calculated from a multivariate normal distribu-
+tion of the entire training data and P(ξj) is the initial state
+probability distribution.
+The Logistic Regression-HSMM algorithm use the com-
+bination of four type of features: Homomorphic envelope,
+Hilbert envelope, Wavelet envelope and Power spectral density
+envelope. The details of these features can be seen in [35]. The
+overall PCG recordings are given to the model for accurate
+detection of most probable states (i.e., S1 and S2).
+Figure 3: Four states (S1, S2, systole, and diastole) of the heart
+cycle using Logistic Regression-HSMM
+Figure 3 shows the detected four states (i.e., S1, S2, systole,
+and asystole) of two heart cycles. Note that, generally, it is
+called as S1 and S2 detection, although it detects all the four
+states: S1, S2, systole, and asystole. The blue line is for the
+heart signal and the black line shows the detected states using
+Logistic Regression-HSMM algorithm.
+C. Segment Extraction
+After detecting the position of heart states, we segmented
+the overall PCG waveform into shorter instances by locating
+the beginning of each heartbeat. This is because the number
+of audio recordings (i.e., 3240) of heart signal is not adequate
+to evaluate RNNs for designing a robust system. Segment
+extraction was also used in previous studies to divide the
+overall heart sound in smaller chunks. For instance, Rubin
+et al. [23] used a segment of T = 3 seconds for training
+and validation of CNN. In this paper, we segmented the
+heart signal into three sequences of heart cycles: 2, 5, and 8.
+These segments contain enough information and at the same
+time small enough to generate many samples for training the
+model. Figure 4a & 4b shows the ﬁve cycles of normal and
+abnormal heart sound, respectively. The abnormal heart sound
+is different from the normal one in temporal context. It has
+heart cycle states of longer duration in the segment.
+D. Feature Selection
+The extraction and selection of more relevant parameters
+from PCG signals are crucial tasks. They signiﬁcantly affect
+the recognition performance of the model. In this paper we
+used Mel-frequency cepstral coefﬁcients (MFCCs) [39] to
+represent PCG signal in compact representation. MFCCs are
+used almost in every study on automatic heart sound classiﬁ-
+cation (for example, [24], [40]–[42]) due to their effectiveness
+in speech analysis. We compute MFCCs from 25ms of the
+window with a step size of 10ms. We select the ﬁrst 13 MFCCs
+for compact representation of PCG signal as a large feature
+space does not always improve the recognition rate of the
+model [43].
+E. Model Parameters
+We built our models using Keras [44] with a TensorFlow
+backend [45]. In order to ﬁnd the best models’ structure, we
+evaluated a different number of gated layers from one to four.
+A smaller model with only one LSTM or GRU layer was
+not performing well on this task. Experiments with a larger
+number of gated layers and dense layers also failed to give
+improvements in performance. This might be due to overﬁtting
+problem. We got the best classiﬁcation results using 2 gated
+layers for both LSTM and GRU models. Therefore, our LSTM
+and BLSTM models consist of two LSTM layer with tanh
+function [46] as activation. For each heartbeat, the outputs of
+LSTM or BLSTM layers were given to the dense layer and
+the outputs of this layer were given to the softmax layer for
+classiﬁcation (refer to Section III).
+We trained all these models using the training portion of
+the dataset and development portion of the data was used
+for hyper-parameter selection. We started training the network
+with a learning rate of 0.002 and learning rate was halved
+after every 5 epochs if the classiﬁcation rate of the model did
+not improve on the validation set. This process continued until
+the learning rate reached below 0.00001 or until the maximum
+epochs i.e., 100 were reached. We used batch normalization af-
+ter the dense layer for normalization of learned distribution to
+improve the training efﬁciency [47]. In order to accommodate
+the effect of initialization, we repeated each hyperparameter
+combination for three times and used the averaged prediction
+for validation and testing.
+V. RESULTS AND DISCUSSION
+The overall dataset of PhysioNet Computing in Cardiology
+Challenge consisted of eight heart sound databases gathered
+from seven different countries. There is a total of 3240 publicly
+available heartbeat recordings. We detected heart states in
+each PCG waveform and segmented these signals into smaller
+chunks containing exact ﬁve heart cycles. MFCCs were com-
+puted from these chunks and both models were trained on
+75% of data, 15% data was used for validation and remaining
+10% of data was used for testing. As each model was trained
+on MFCC computed from the smaller segment, to predict
+the score for full instance, an averaging was performed on
+posterior probabilities of the respective chunks. In this work,
+the accuracy of RNNs has been tested on three different cycles:
+2, 5, and 8 in a heart signal (see Figure 5). All RNN models
+consistently performed well on 5 cycles. Therefore, onward
+we mention results using 5 cycles.
+
+
+5
+(a)
+(b)
+Figure 4: Extracted segments of ﬁve heart cycles using (4a) Normal and (4b) Abnormal heartbeats. Abnormal heart cycles
+have longer duration.
+Figure 5: Accuracy using different number of heart cycles,
+where RNNs give best results using 5 cycles.
+A. Baseline models
+In order to compare the performance of RNNs, we selected
+three classic powerful classiﬁers: Logistic Regression (LR),
+Support Vector Machines (SVM), and Random Forest (RF)
+as baseline models. We trained these models on MFCCs
+computed from 5 heart cycles. In SVM, we tested three
+kernels: linear, polynomial, and radial basis function (RBF)
+to obtain the best classiﬁcation results. Hyperparameters of
+these models were selected using validation data. Table I
+shows the best results obtained by these models and presents
+a comparison with RNNs. We observe RNNs signiﬁcantly
+outperform all three models in every performance measures.
+Table I: Comparison of SVM and LR with RNN
+Model
+Sensitivity
+Speciﬁcity
+Accuracy
+SVM (best)
+0.8259
+0.8324
+0.8291
+LR (best)
+0.7121
+0.6879
+0.6991
+RF (best)
+0.6901
+0.6850
+0.6861
+RNNs (best)
+0.9886
+0.9836
+0.9763
+B. Comparison with non-recurrent deep models
+We compare the performance of RNNs with most recent
+studies on PCG classiﬁcation using DNNs in Table II. It can
+Table II: Comparison of results with previous attempts.
+Author (Year)
+Approach
+Sensitivity
+Speciﬁcity
+Accuracy
+Potes et al. [24]
+(2016)
+AdaBoost
+and CNN
+0.9424
+0.7781
+0.8602
+Tschannen et al.
+[48] (2016)
+Wavelet-
+based CNN
+0.855
+0.859
+0.828
+Rubin et al. [23]
+(2017)
+CNN
+0.7278
+0.9521
+0.8399
+Nassralla at al.
+[20] (2017)
+DNNs
+0.63
+0.82
+0.80
+Dominguez at al.
+[49] (2018)
+Modiﬁed
+AlexNe
+0.9512
+0.9320
+0.9416
+LSTM
+0.9995
+0.9671
+0.9706
+Our Study (2018)
+BLSTM
+0.9886
+0.9836
+0.9763
+GRU
+0.9669
+0.9793
+0.9542
+BiGRU
+0.9846
+0.9728
+0.9721
+be clearly noticed that RNNs outperform all deep learning
+models used on heart sound classiﬁcation with a signiﬁcant
+improvement. Worth mentioning, heart sound classiﬁcation
+using the ensemble of AdaBoost and CNN achieved “Rank
+1” in PhysioNet Computing in Cardiology Challenge 2016
+with the best recognition rate. In our approach, RNNs using
+LSTM and even with GRUs have achieved better recognition
+rate than that in every performance measures.
+C. Performance Comparison of RNNs
+In this study, our evaluation focused on the sequence model-
+ing of heart sound using RNNs. We explored the performance
+of different state-of-the-art RNNs for this task. Based on the
+experimental results, it can be highlighted that the different
+RNNs have achieved comparable performances. However, out
+of all models, BLSTMs perform consistently well and is
+preferred for heartbeat classiﬁcation using PCG. Another im-
+portant ﬁnding, despite having a simpler architecture compared
+to LSTM, the performance of GRU is also promising on PCG
+data.
+VI. CONCLUSION
+In this paper, we conduct an empirical study on abnor-
+mal heartbeat detection using PCG signal and demonstrate
+
+
+6
+(a)
+(b)
+Figure 6: Performance comparison of RNNs on heartbeat classiﬁcation: (6a) LSTM vs GRU and (6b) BLSTM vs BiGRU.
+that Recurrent neural networks (RNNs) produce promising
+results. In particular, the results are signiﬁcantly better than
+the conventional deep learning models. RNNs have the most
+important architectures to capture the temporal statistics and
+dynamics in the sequence of heartbeats more efﬁciently as
+compared to the other popular DNNs like CNN. Noteworthy,
+the RNN models signiﬁcantly outperform the AdaBoost-CNN
+model which was placed Rank 1 in the PhysioNet Computing
+in Cardiology Challenge 2016. In our future studies, we aim
+to produce further empirical evidences of why RNNs are
+promising for heartbeat classiﬁcation.
+REFERENCES
+[1] S. Allender, P. Scarborough, V. Peto, M. Rayner, J. Leal, R. Luengo-
+Fernandez, and A. Gray, “European cardiovascular disease statistics,”
+2008.
+[2] D. Lloyd-Jones, R. J. Adams, T. M. Brown, M. Carnethon, S. Dai,
+G. De Simone, T. B. Ferguson, E. Ford, K. Furie, C. Gillespie et al.,
+“Heart disease and stroke statistics2010 update,” Circulation, vol. 121,
+no. 7, pp. e46–e215, 2010.
+[3] S. Latif, J. Qadir, M. Usman, M. Y. Khan, A. Qayyum, S. M. Ali,
+Q. H. Abbasi, and M. A. Imran, “Mobile technologies for managing non-
+communicable diseases in developing countries,” Mobile Applications
+and Solutions for Social Inclusion, p. 261, 2018.
+[4] Z.-J. Yang, J. Liu, J.-P. Ge, L. Chen, Z.-G. Zhao, and W.-Y. Yang,
+“Prevalence of cardiovascular disease risk factor in the chinese popu-
+lation: the 2007–2008 china national diabetes and metabolic disorders
+study,” European heart journal, vol. 33, no. 2, pp. 213–220, 2011.
+[5] D. Roy, J. Sargeant, J. Gray, B. Hoyt, M. Allen, and M. Fleming,
+“Helping family physicians improve their cardiac auscultation skills with
+an interactive cd-rom,” Journal of Continuing Education in the Health
+Professions, vol. 22, no. 3, pp. 152–159, 2002.
+[6] S. Mangione and L. Z. Nieman, “Cardiac auscultatory skills of internal
+medicine and family practice trainees: a comparison of diagnostic
+proﬁciency,” Jama, vol. 278, no. 9, pp. 717–722, 1997.
+[7] M. Lam, T. Lee, P. Boey, W. Ng, H. Hey, K. Ho, and P. Cheong, “Fac-
+tors inﬂuencing cardiac auscultation proﬁciency in physician trainees,”
+Singapore medical journal, vol. 46, no. 1, p. 11, 2005.
+[8] S. L. Strunic, F. Rios-Guti´errez, R. Alba-Flores, G. Nordehn, and
+S. Bums, “Detection and classiﬁcation of cardiac murmurs using seg-
+mentation techniques and artiﬁcial neural networks,” in Computational
+Intelligence and Data Mining, 2007. CIDM 2007. IEEE Symposium on.
+IEEE, 2007, pp. 397–404.
+[9] K. Ejaz, G. Nordehn, R. Alba-Flores, F. Rios-Gutierrez, S. Burns, and
+N. Andrisevic, “A heart murmur detection system using spectrograms
+and artiﬁcial neural networks.” in Circuits, Signals, and Systems, 2004,
+pp. 374–379.
+[10] A. A. H. Care, “How Much Does an EKG Cost?, accessed on: 25-May-
+2018,” http://health.costhelper.com/ecg.html#extres2, Mar. 2018.
+[11] D. B. Springer, “Mobile phone-based rheumatic heart disease detection,”
+Ph.D. dissertation, University of Oxford, 2015.
+[12] S. Latif, J. Qadir, S. Farooq, and M. A. Imran, “How 5g wireless
+(and concomitant technologies) will revolutionize healthcare?” Future
+Internet, vol. 9, no. 4, p. 93, 2017.
+[13] S. Ari and G. Saha, “In search of an optimization technique for
+artiﬁcial neural network to classify abnormal heart sounds,” Applied
+Soft Computing, vol. 9, no. 1, pp. 330–340, 2009.
+[14] I. Maglogiannis, E. Loukis, E. Zaﬁropoulos, and A. Stasis, “Support
+vectors machine-based identiﬁcation of heart valve diseases using heart
+sounds,” Computer methods and programs in biomedicine, vol. 95, no. 1,
+pp. 47–61, 2009.
+[15] P. Wang, C. S. Lim, S. Chauhan, J. Y. A. Foo, and V. Anantharaman,
+“Phonocardiographic signal analysis method using a modiﬁed hidden
+markov model,” Annals of Biomedical Engineering, vol. 35, no. 3, pp.
+367–374, 2007.
+[16] R. Sarac¸O˘gLu, “Hidden markov model-based classiﬁcation of heart
+valve disease with pca for dimension reduction,” Engineering Appli-
+cations of Artiﬁcial Intelligence, vol. 25, no. 7, pp. 1523–1528, 2012.
+[17] L. Avendano-Valencia, J. Godino-Llorente, M. Blanco-Velasco, and
+G. Castellanos-Dominguez, “Feature extraction from parametric time–
+frequency representations for heart murmur detection,” Annals of
+Biomedical Engineering, vol. 38, no. 8, pp. 2716–2732, 2010.
+[18] Y. Zheng, X. Guo, and X. Ding, “A novel hybrid energy fraction
+and entropy-based approach for systolic heart murmurs identiﬁcation,”
+Expert Systems with Applications, vol. 42, no. 5, pp. 2710–2721, 2015.
+[19] H. U˘guz, “A biomedical system based on artiﬁcial neural network and
+principal component analysis for diagnosis of the heart valve diseases,”
+Journal of medical systems, vol. 36, no. 1, pp. 61–72, 2012.
+[20] M. Nassralla, Z. El Zein, and H. Hajj, “Classiﬁcation of normal
+and abnormal heart sounds,” in Advances in Biomedical Engineering
+(ICABME), 2017 Fourth International Conference on.
+IEEE, 2017, pp.
+1–4.
+[21] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neural
+computation, vol. 9, no. 8, pp. 1735–1780, 1997.
+[22] C. Liu, D. Springer, Q. Li, B. Moody, R. A. Juan, F. J. Chorro,
+F. Castells, J. M. Roig, I. Silva, A. E. Johnson et al., “An open access
+database for the evaluation of heart sound algorithms,” Physiological
+Measurement, vol. 37, no. 12, p. 2181, 2016.
+[23] J. Rubin, R. Abreu, A. Ganguli, S. Nelaturi, I. Matei, and K. Sricha-
+ran, “Recognizing abnormal heart sounds using deep learning,” arXiv
+preprint arXiv:1707.04642, 2017.
+[24] C. Potes, S. Parvaneh, A. Rahman, and B. Conroy, “Ensemble of feature-
+based and deep learning-based classiﬁers for detection of abnormal heart
+sounds,” in Computing in Cardiology Conference (CinC), 2016.
+IEEE,
+2016, pp. 621–624.
+[25] I. Sutskever, O. Vinyals, and Q. V. Le, “Sequence to sequence learning
+with neural networks,” in Advances in neural information processing
+systems, 2014, pp. 3104–3112.
+[26] A. Graves, A.-r. Mohamed, and G. Hinton, “Speech recognition with
+deep recurrent neural networks,” in Acoustics, speech and signal pro-
+cessing (icassp), 2013 ieee international conference on.
+IEEE, 2013,
+pp. 6645–6649.
+
+
+7
+[27] K. Cho, B. Van Merri¨enboer, C. Gulcehre, D. Bahdanau, F. Bougares,
+H. Schwenk, and Y. Bengio, “Learning phrase representations using
+rnn encoder-decoder for statistical machine translation,” arXiv preprint
+arXiv:1406.1078, 2014.
+[28] D. Bahdanau, K. Cho, and Y. Bengio, “Neural machine translation by
+jointly learning to align and translate,” arXiv preprint arXiv:1409.0473,
+2014.
+[29] M. W¨ollmer, F. Eyben, S. Reiter, B. Schuller, C. Cox, E. Douglas-
+Cowie, and R. Cowie, “Abandoning emotion classes-towards continuous
+emotion recognition with modelling of long-range dependencies,” in
+Proc. 9th Interspeech 2008 incorp. 12th Australasian Int. Conf. on
+Speech Science and Technology SST 2008, Brisbane, Australia, 2008,
+pp. 597–600.
+[30] M. Schuster and K. K. Paliwal, “Bidirectional recurrent neural net-
+works,” IEEE Transactions on Signal Processing, vol. 45, no. 11, pp.
+2673–2681, 1997.
+[31] A. Graves, S. Fern´andez, and J. Schmidhuber, “Bidirectional lstm
+networks for improved phoneme classiﬁcation and recognition,” in
+International Conference on Artiﬁcial Neural Networks. Springer, 2005,
+pp. 799–804.
+[32] A. Graves and N. Jaitly, “Towards end-to-end speech recognition with
+recurrent neural networks,” in International Conference on Machine
+Learning, 2014, pp. 1764–1772.
+[33] R. Lu and Z. Duan, “Bidirectional gru for sound event detection,”
+Detection and Classiﬁcation of Acoustic Scenes and Events, 2017.
+[34] O. Deperlioglu, “Classiﬁcation of phonocardiograms with convolutional
+neural networks,” BRAIN. Broad Research in Artiﬁcial Intelligence and
+Neuroscience, vol. 9, no. 2, pp. 22–33, 2018.
+[35] D. B. Springer, L. Tarassenko, and G. D. Clifford, “Logistic regression-
+hsmm-based heart sound segmentation,” IEEE Transactions on Biomed-
+ical Engineering, vol. 63, no. 4, pp. 822–832, 2016.
+[36] S. Schmidt, C. Holst-Hansen, C. Graff, E. Toft, and J. J. Struijk,
+“Segmentation of heart sound recordings by a duration-dependent hidden
+markov model,” Physiological measurement, vol. 31, no. 4, p. 513, 2010.
+[37] N. P. Hughes and H. Term, “Probabilistic models for automated ecg
+interval analysis,” Ph.D. dissertation, University of Oxford, 2006.
+[38] F. Marzbanrad, Y. Kimura, K. Funamoto, R. Sugibayashi, M. Endo,
+T. Ito, M. Palaniswami, and A. H. Khandoker, “Automated estimation of
+fetal cardiac timing events from doppler ultrasound signal using hybrid
+models,” IEEE journal of biomedical and health informatics, vol. 18,
+no. 4, pp. 1169–1177, 2014.
+[39] S. Davis and P. Mermelstein, “Comparison of parametric representations
+for monosyllabic word recognition in continuously spoken sentences,”
+IEEE transactions on acoustics, speech, and signal processing, vol. 28,
+no. 4, pp. 357–366, 1980.
+[40] J. J. G. Ortiz, C. P. Phoo, and J. Wiens, “Heart sound classiﬁcation
+based on temporal alignment techniques,” in Computing in Cardiology
+Conference (CinC), 2016.
+IEEE, 2016, pp. 589–592.
+[41] M. Zabihi, A. B. Rad, S. Kiranyaz, M. Gabbouj, and A. K. Katsaggelos,
+“Heart sound anomaly and quality detection using ensemble of neural
+networks without segmentation,” in Computing in Cardiology Confer-
+ence (CinC), 2016.
+IEEE, 2016, pp. 613–616.
+[42] J. Rubin, R. Abreu, A. Ganguli, S. Nelaturi, I. Matei, and K. Sricharan,
+“Classifying heart sound recordings using deep convolutional neural
+networks and mel-frequency cepstral coefﬁcients,” in Computing in
+Cardiology Conference (CinC), 2016.
+IEEE, 2016, pp. 813–816.
+[43] R. Rana, “Gated recurrent unit (gru) for emotion classiﬁcation from
+noisy speech,” arXiv preprint arXiv:1612.07778, 2016.
+[44] F. Chollet et al., “Keras,” 2015.
+[45] M. Abadi, P. Barham, J. Chen, Z. Chen, A. Davis, J. Dean, M. Devin,
+S. Ghemawat, G. Irving, M. Isard et al., “Tensorﬂow: A system for
+large-scale machine learning.” in OSDI, vol. 16, 2016, pp. 265–283.
+[46] X. Glorot and Y. Bengio, “Understanding the difﬁculty of training
+deep feedforward neural networks,” in Proceedings of the thirteenth
+international conference on artiﬁcial intelligence and statistics, 2010,
+pp. 249–256.
+[47] S. Ioffe and C. Szegedy, “Batch normalization: Accelerating deep
+network training by reducing internal covariate shift,” arXiv preprint
+arXiv:1502.03167, 2015.
+[48] M. Tschannen, T. Kramer, G. Marti, M. Heinzmann, and T. Wiatowski,
+“Heart sound classiﬁcation using deep structured features,” in Computing
+in Cardiology Conference (CinC), 2016.
+IEEE, 2016, pp. 565–568.
+[49] J. P. Dominguez-Morales, A. F. Jimenez-Fernandez, M. J. Dominguez-
+Morales, and G. Jimenez-Moreno, “Deep neural networks for the recog-
+nition and classiﬁcation of heart murmurs using neuromorphic auditory
+sensors,” IEEE transactions on biomedical circuits and systems, vol. 12,
+no. 1, pp. 24–34, 2018.
+
+
