@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "ra-papers": {
+      "type": "stdio",
+      "command": "/home/david/Documents/RA-papers/.venv/bin/python",
+      "args": ["/home/david/Documents/RA-papers/mcp_server.py"],
+      "env": {
+        "ANONYMIZED_TELEMETRY": "False",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1"
+      }
+    }
+  }
+}

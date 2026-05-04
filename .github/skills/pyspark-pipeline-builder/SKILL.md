@@ -7,6 +7,13 @@ description: Generate, optimize, and debug PySpark jobs for local PDF ingestion,
 
 Use this skill when the task involves building, refactoring, optimizing, or debugging PySpark jobs for local document ingestion, PDF text extraction, and chunking pipelines.
 
+## Agent alignment (custom agents)
+
+- Planner: Provide plan/spec only. No code or scripts.
+- Reviewer: Review scope, risks, and test evidence only.
+- Executer: Code is allowed. Follow PLAN.md and README.
+- Delivery Orchestrator: Route work only. Ask for missing context.
+
 ## Core requirements
 
 - Process PDF documents locally.
@@ -14,6 +21,7 @@ Use this skill when the task involves building, refactoring, optimizing, or debu
 - Prefer native PySpark and Spark SQL constructs for transformations, joins, filtering, grouping, and chunk assembly.
 - Use Python PDF libraries such as PyMuPDF (`fitz`) or `pdfplumber` only inside Spark UDFs, mapPartitions logic, or other Spark-compatible worker-side code when extraction is required.
 - Do not introduce LangChain, LlamaIndex, or other heavy orchestration abstractions in the PySpark phase.
+- Do not add LLM text generation. Retrieval remains semantic Top-10 only and is handled outside the PySpark phase.
 - Always include robust error handling for corrupted, unreadable, encrypted, or partially damaged PDF files.
 
 ## Implementation guidance

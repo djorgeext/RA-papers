@@ -14,8 +14,9 @@ The project is built emphasizing local processing, distributed data handling, an
 *   **Workflow Orchestration:** **n8n** is utilized as a visual backend to automate routing, handle HTTP triggers, and format the retrieved JSON responses without boilerplate API code.
 *   **Agentic Integration:** Implements a **Model Context Protocol (MCP)** server, securely exposing the local vector database so that external MCP-compatible AI clients (like Cursor or Claude) can autonomously query the system's knowledge base.
 
-## Current Scope (Phase 1)
+## Current Scope (Phase 3)
 - [x] Distributed document ingestion and text chunking.
 - [x] Local embedding generation.
 - [x] Top-K (Top-10) semantic similarity retrieval.
-- [ ] *Phase 2 (Future): Integration of a generative LLM for synthesize answers based on retrieved context.*
+- [x] Phase 2: Local ChromaDB ingestion, normalized chunk staging, and Top-10 retrieval from the processed parquet chunks.
+- [ ] Phase 3: Local query CLI, stdio MCP server, and client config for Top-10 retrieval from `academic_papers_collection`.
